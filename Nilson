@@ -1,0 +1,177 @@
+#coding=utf-8
+import time
+from selenium import webdriver
+from PyPDF2 import PdfFileReader, utils
+import base64 as base
+from io import BytesIO, StringIO
+import subprocess
+import os
+import Pje.ReadPdf as ExportPdf
+import glob
+import os
+
+
+def AbrirDocumento(caminho_arquivo):
+    arquivo = ExportPdf.Teste.extract_text_from_pdf(caminho_arquivo)
+    return arquivo
+
+
+
+def DeletarArquivo(caminho_arquivo):
+    file_name = caminho_arquivo[33:] #CAPTURA NOME DO ARQUIVO
+    diretorio = "/Users/users/Downloads/"
+    dir = os.listdir(diretorio)
+    for file in dir:
+        if file == file_name:
+            try:
+                os.remove(caminho_arquivo)
+            except OSError:
+                print(OSError)
+
+def CapturarUltimoDocumentoDownload():
+    list_of_files = glob.glob('/Users/users/Downloads/*')  # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    return latest_file
+
+def ConsultaProcessoPje():
+
+    urlLogin = 'https://pje.tjba.jus.br/pje-web/login.seam';
+    urlConsultaProcesso = 'https://pje.tjba.jus.br/pje-web/Processo/ConsultaProcesso/listView.seam'
+    loginPje = 
+    senhaPje = 
+
+    #driver do selenium
+    browser = webdriver.Chrome('/Users/users/Downloads/chromedriver 2')
+
+    browser.get(urlLogin)
+
+    time.sleep(5)
+
+    #fechar Modal
+    browser.execute_script('fecharMpModoOperacaoSemEscolherOpcao()')
+
+
+    browser.find_element_by_id('username').send_keys(loginPje)
+    browser.find_element_by_id('password').send_keys(senhaPje)
+
+
+    browser.find_elements_by_xpath("//input[@id='btnEntrar']")[0].click()
+
+    #IR PARA PAGINA DE CONSULTA
+    browser.get(urlConsultaProcesso)
+
+
+    #setar o valor dos processos
+    browser.find_element_by_id('fPP:numeroProcesso:numeroSequencial').send_keys('XXXXX')
+    browser.find_element_by_id('fPP:numeroProcesso:numeroDigitoVerificador').send_keys('XX')
+    browser.find_element_by_id('fPP:numeroProcesso:Ano').send_keys('XXXX')
+    browser.find_element_by_id('fPP:numeroProcesso:NumeroOrgaoJustica').send_keys('XXXX')
+
+    #clicar para pesquisar
+    browser.find_elements_by_xpath("//input[@id='fPP:searchProcessos']")[0].click()
+
+    time.sleep(30)
+
+    #acessar o detalhes do processo - o titulo eh o numero do processo
+    click_process0 = browser.find_elements_by_xpath("//a[@title='XXXXX-XX.XXXX.X.XX.XXXX']")[0]
+    if (click_process0 != ''):
+        click_process0.click()
+
+    #################################
+    # Pagina para capturar os dados #
+    ################################
+
+    time.sleep(10)
+    #escolher a tela recorrente quando foi aberta com o click do evento anterior
+    windows_after = browser.window_handles[1]
+
+    #escolhe a tela aberta
+    browser.switch_to.window(windows_after)
+
+    #capturar todas as divs class
+    arvore = browser.find_elements_by_xpath(".//div[@class='anexos']")
+
+    #arvore_a = browser.find_elements_by_xpath(".//a")
+    #login_form = browser.find_element_by_xpath("//form[@value='Outros documentos']")
+    arvore_a = browser.find_elements_by_tag_name('a')
+    index = 0
+    for item in arvore_a:
+        try:
+            index += 1
+            if item.text != '':
+                if 'Outros documentos' in item.text:
+                    time.sleep(20)
+                    item.click()
+                    time.sleep(10)
+                    browser.find_elements_by_xpath("//a[@id='detalheDocumento:download']")[0].click()
+                    time.sleep(20)
+                    browser.switch_to.alert.accept()
+
+                    time.sleep(10)
+
+                    file_url = CapturarUltimoDocumentoDownload()
+
+                    print(file_url)
+
+                    arquivo = AbrirDocumento(file_url)
+
+                    print(arquivo)
+
+                    DeletarArquivo(file_url)
+
+                    print(file_url)
+
+
+
+
+                    #browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+                    #arquivo = browser.find_element_by_tag_name("embed")
+                    #file = BytesIO(base.b64decode(arquivo.screenshot_as_base64))
+                    #with file as open_pdf:
+                    #    read_pdf = PdfFileReader(decompress_pdf(open_pdf))
+                    #    count_pdf = read_pdf.numPages
+                    #    page = read_pdf.getPage(0)
+                    #    texto = page.extractText()
+                    #    print(texto)
+        except:
+            #time.sleep(2)
+            #browser.switch_to.window(windows_after)
+            continue
+
+
+
+
+
+
+                #WebScrappingPaginaConsulta(browser.page_source)
+
+
+
+
+
+
+if __name__ == '__main__':
+    ConsultaProcessoPje()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
