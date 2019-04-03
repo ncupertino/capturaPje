@@ -6,15 +6,8 @@ import base64 as base
 from io import BytesIO, StringIO
 import subprocess
 import os
-import Pje.ReadPdf as ExportPdf
 import glob
 import os
-
-
-def AbrirDocumento(caminho_arquivo):
-    arquivo = ExportPdf.Teste.extract_text_from_pdf(caminho_arquivo)
-    return arquivo
-
 
 
 def DeletarArquivo(caminho_arquivo):
@@ -113,7 +106,7 @@ def ConsultaProcessoPje():
 
                     print(file_url)
 
-                    arquivo = AbrirDocumento(file_url)
+                   
 
                     print(arquivo)
 
